@@ -17,7 +17,6 @@ class AccountStatementImport(models.TransientModel):
     _description = "Import Bank Statement Files"
 
     statement_file = fields.Binary(
-        string="Statement File",
         required=True,
         help="Get you bank statements in electronic format from your bank "
         "and select them here.",
@@ -254,13 +253,14 @@ class AccountStatementImport(models.TransientModel):
                 else:
                     raise UserError(
                         _(
-                            "Could not find any bank account with number '%s' "
-                            "linked to partner '%s'. You should create the bank "
+                            "Could not find any bank account with number '%(bank_account)s' "
+                            "linked to partner '%(partner)s'. You should create the bank "
                             "account and set it on the related bank journal. "
                             "If the related bank journal doesn't exist yet, you "
-                            "should create a new one."
+                            "should create a new one.",
+                            bank_account=account_number,
+                            partner=company.partner_id.display_name,
                         )
-                        % (account_number, company.partner_id.display_name)
                     )
 
         # We support multi-file and multi-statement in a file
@@ -270,10 +270,12 @@ class AccountStatementImport(models.TransientModel):
         if journal_currency != currency:
             raise UserError(
                 _(
-                    "The currency of the bank statement (%s) is not the same as the "
-                    "currency of the journal '%s' (%s)."
+                    "The currency of the bank statement (%(currency)s) is not the same as the "
+                    "currency of the journal '%(journal)s' (%(journal_currency)s).",
+                    currency=currency.name,
+                    journal=journal.display_name,
+                    journal_currency=journal_currency.name,
                 )
-                % (currency.name, journal.display_name, journal_currency.name)
             )
         return journal
 
